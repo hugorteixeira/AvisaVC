@@ -33,7 +33,6 @@ O navegador abrirá automaticamente em: **http://localhost:3000**
 
 - **[START_HERE.md](START_HERE.md)** - Guia completo passo a passo
 - **[INTEGRATION_COMPLETE.md](INTEGRATION_COMPLETE.md)** - Funcionalidades implementadas
-- **[ARTER_IA_README.md](ARTER_IA_README.md)** - Documentação técnica completa
 - **[CALIBRATION_FEATURE.md](CALIBRATION_FEATURE.md)** - Sistema de calibração
 
 ## ✨ Funcionalidades Principais
