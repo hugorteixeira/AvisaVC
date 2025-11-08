@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+import uuid
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -52,12 +54,25 @@ class TranscriptsResponse(BaseModel):
     transcripts: list[TranscriptModel]
 
 
+class SessionResponse(BaseModel):
+    session_id: str
+
+
 def create_app() -> FastAPI:
     settings = Settings()
     engine = AudioEngine(settings)
     app = FastAPI(title="AvisoVC API", version="0.2.0")
     app.state.settings = settings
     app.state.engine = engine
+
+    # Add CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # In production, specify your frontend URL
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     frontend_dir = Path("frontend")
     static_dir = frontend_dir / "static"
@@ -74,6 +89,14 @@ def create_app() -> FastAPI:
     @app.get("/healthz")
     def healthcheck() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.post("/api/session", response_model=SessionResponse)
+    def create_session() -> SessionResponse:
+        """Create a new session and return the session ID."""
+        session_id = str(uuid.uuid4())
+        # Initialize the session by accessing it (lazy initialization)
+        app.state.engine._get_session(session_id)
+        return SessionResponse(session_id=session_id)
 
     @app.post("/api/audio-chunk", response_model=ChunkResponse)
     def ingest_audio(payload: AudioChunkPayload) -> ChunkResponse:
